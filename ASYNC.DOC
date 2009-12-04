@@ -1,0 +1,302 @@
+.   .   .   .   ########################################## .   .   .   .   .
+  .   .   .   . ##                                      ##   .   .   .   .
+.   .   .   .   ##   Async Tools for the Async Minded   ## .   .   .   .   .
+  .   .   .   . ##   ================================   ##   .   .   .   .
+.   .   .   .   ##           Scott A. Deming            ## .   .   .   .   .
+  .   .   .   . ##          sad@umcc.umich.edu          ##   .   .   .   .
+.   .   .   .   ##   No version yet, and no real name.  ## .   .   .   .   .
+  .   .   .   . ##                                      ##   .   .   .   .
+.   .   .   .   ########################################## .   .   .   .   .
+============================================================================
+
+----------------------------------------------------------------------------
+SETUART.C
+=========
+
+void    set_UART_port(int comport, int value);
+void    set_UART_int(int comport, int value);
+void    set_UART_onmask(int comport, int value);
+void    set_UART_offmask(int comport, int value);
+   Change defaults.  Probably not very useful, but maybe.  No return values,
+   because there really isn't anything significant here.  These routines
+   probably wont stick around too long as they seem like they will probably
+   just clutter the code up.
+
+int     set_parity(int comport, int parity);
+   Change parity of currently open port.
+   Returns 1 if successful, 0 if not.
+
+int     set_stopbits(int comport, int stopbits);
+   Change stop bits of currently open port.
+   Returns 1 if successful, 0 if not.
+
+int     set_wordlength(int comport, int wordlength);
+   Change word length of currently open port.
+   Returns 1 if successful, 0 if not.
+
+int     set_baudrate(int comport, long baudrate);
+   Change baudrate of currently open port.
+   Returns 1 if successful, 0 if not.
+
+void    set_handshaking(int comport, int handshaking, int enable);
+   Set handshaking on comport.  handshaking is one of the HSHAKE
+   definitions found in ASYNC.H, and enable is 1 to enable, or 0 to
+   disable.
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+DETECT.C -- These routines were taken DIRECTLY from Chris Blums SERIAL port
+========    Summary.
+
+int     async_detect_uart(int comport);
+   Detect what type of UART is on a particular comport.  Returns UART_xxxx
+   which are MACRO's that can be found in ASYNC.H
+
+int     async_detect_irq(int comport);
+   Detect what IRQ line is used by a particular comport.  Returns the IRQ
+   or -1 if it fails for some reason.
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+ISR.C
+=====
+void    init_ISR(int comport);
+   Initialize the Interrupt Service Routine for a specified comport.
+
+void    deinit_ISR(int comport);
+   Remove the ISR from comport.
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+FIFO.C
+======
+int     init_fifo(int comport, int enable);
+   Enable or Disable FIFO on the UART.  Returns 1 if successful, or 0 if not.
+   It does make sure you have a 16550A before continuing.  This routine will
+   only work on a port opened with open_port(async.c).
+
+THIS CODE ISN'T COMPLETE YET EITHER.  I JUST HAVEN'T GOTTEN AROUND TO IT YET
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+ASYNC.C
+=======
+int     open_port(int comport, long baudrate, int parity, int stopbits, int wordlength);
+   Pretty much self explanitory.  If the port is already open, it returns a 0,
+   otherwise it returns 1 for a successful open.
+
+int     close_port(int comport, int rts, int dtr);
+   Closes the com port.  If rts != 0 it leaves the rts line the same.  If
+   dtr != 0 it leaves the dtr line the same.  This is useful for programs
+   that exit but don't want to hang up the modem.  Returns a 0 if the port
+   wasn't open to begin with, or a 1 if it closes down successfuly.
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+LINE.C
+======
+int     async_LCR(int comport);
+   Returns the value of the LCR line on comport.
+
+int     async_MCR(int comport);
+   Returns the value of the MCR line on comport.
+
+int     async_LSR(int comport);
+   Returns the value of the LSR line on comport.
+
+int     async_MSR(int comport);
+   Returns the value of the MSR line on comport.
+
+int     async_DTR_status(int comport);
+   Returns the status of DTR on comport.
+
+int     async_RTS_status(int comport);
+   Returns the status of RTS on comport.
+
+void    async_set_DTR(int comport, int status);
+   Sets the status of DTR on comport.
+
+void    async_set_RTS(int comport, int status);
+   Sets the status of RTS on comport.
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+ASYIO.C
+=======
+int     async_putch_timeout(int comport, char c, long timeout);
+   Put a character (c) to comport, failing after timeout milliseconds
+   Returns 1 on success, and 0 on timeout.
+
+void    async_putch(int comport, char c);
+   Put a character (c) to comport.
+
+void    async_puts(int comport, char *s);
+   Put a string (s) to comport.
+
+void    async_printf(int comport, char *fmt, ...);
+   Printf a string to comport.  Follows the standard printf format.
+
+int     async_putblock_timeout(int comport, const char *block, int size, long timeout);
+   Put a block (block) of size to comport, failing after timeout milliseconds
+   Returns 1 on success, and 0 on timeout.
+
+void    async_putblock(int comport, const char *block, int size);
+   Put a block (block) of size to comport.
+
+int     async_ready(int comport);
+   Returns 1 if there is a character waiting in the RX buffer of comport,
+   and 0 if no character is waiting.
+
+char    async_getch(int comport);
+   Returns the next character in the RX buffer of comport, removing it from
+   the buffer.
+
+int     async_gets(int comport, char *s, int size)
+   Gets a string of characters from comport of size bytes, or until a CR
+   or LF is reached.  Stores the string in s.
+   Returns the number of characters read from the RX buffer.
+
+int     async_getblock_timeout(int comport, char *block, int size, long timeout);
+   Pulls up to size bytes from the RX buffer of comport and puts them into
+   a block (block), removing them from the RX buffer.  This function will
+   wait for up to timeout milliseconds to meet the size requirements and will
+   return the actual number of bytes pulled.
+
+int     async_getblock(int comport, char *block, int size);
+   Pulls up to size bytes from the RX buffer of comport and puts them into
+   a block (block), removing them from the RX buffer.  Returns the number
+   of bytes actually pulled from the buffer.
+
+char    async_peek(int comport);
+   Returns the next character in the RX buffer of comport, leaving it in the
+   buffer for later retrieval.
+
+void    async_flushrx(int comport);
+   Flushes the RX buffer on comport.
+
+void    async_flushtx(int comport);
+   Flushes the TX buffer on comport.
+----------------------------------------------------------------------------
+MACROs
+======
+
+Misc:
+
+NUMBEROFPORTS
+   Number of COM ports available.  Change this if you add support for any
+   additional ports via digiboard or whatever.
+
+COM1
+COM2
+COM3
+COM4
+   COM 1 through 4 MACROS.  Basically just for ease of use.  Note that
+   COM1 is zero, not one.
+
+
+Uart:
+
+UART_NONE
+UART_8250
+UART_16460
+UART_16550
+UART_16550A
+   UART identifiers.  These simply tell what UART is detected on the
+   specified com port with the async_detect_uart() function.
+
+BASE
+   Base (No real reason to have this)
+IER
+   Interrupt Enable Register
+IIR
+   Interrupt Identification Register
+FCR
+   16550 FIFO Control Register
+LCR
+   Line Control Register
+MCR
+   Modem Control Register
+LSR
+   Line Status Register
+MSR
+   Modem Status Register
+SCRATCH
+   Scratch Pad (Is this ever used?)
+
+
+Handshaking:
+
+HSHAKE_NONE
+HSHAKE_XONXOFF
+   Use these for setting handshaking on or off with the
+   set_handshaking() function.
+   NOTE: These are pretty useless right now, as handshaking is not
+   supported by this library yet.
+
+
+Buffers:
+
+TXBUFSIZE
+RXBUFSIZE
+   These are internal MACROs that specify the size of your transmit and
+   receiving buffers.  Adjust to whatever you'd like.  The memory for
+   these buffers is allocated dynamically.
+
+
+Modem Control Register:
+
+MCR_DTR
+   DTR bit
+MCR_RTS
+   RTS bit
+MCR_OUT1
+   OUT1 bit
+MCR_OUT2
+   OUT2 bit
+MCR_LOOPBACK
+   Loopback bit
+
+
+Line Control Register:
+
+LCR_PNONE
+   Parity value -- NONE
+LCR_PODD
+   Parity value -- ODD
+LCR_PEVEN
+   Parity value -- EVEN
+LCR_PMARK
+   Parity value -- MARK
+LCR_PSPACE
+   Parity value -- SPACE
+----------------------------------------------------------------------------
+Global Variables
+================
+
+fifo_enabled
+   int  : 0 if fifo is disabled, 1 if fifo is enabled.
+
+UART_ports[]
+   int  : Port values for each com port.
+   These values can be altered with the set_UART_port() function.
+
+UART_interrupts[]
+   int  : Interrupt values for each com port.
+   Can be changed with set_UART_int() function.
+
+UART_onmask[]
+   int  : Interrupt ON masking for 8259 controller.
+   Can be changed with set_UART_onmask() function, but probably shouldn't
+   be.
+
+UART_offmask[]
+   int  :  Interrupt OFF masking for 8259 controller.
+   Can be changed with set_UART_offmask() function, but probably shouldn't
+   be.
+
+
+struct  async_portS async_port[];
+   Structure can be found in the file "ASYNC.H"  It's basically the
+   structure containing all of the information about each specific
+   serial port.
+

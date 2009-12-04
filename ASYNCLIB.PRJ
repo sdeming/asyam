@@ -1,0 +1,7 @@
+asynclib.mix async.c isr.c asyio.c detect.c line.c setuart.c \
+    fifo.c pc_comp.c hshake.c
+    pc /dPOWERC /w /w-229 /s /y /2 /ml /ipowerc asynclib
+
+term    asynclib.mix
+    pc /dPOWERC /e /w /w-229 /s /y /2 /ml /i\powerc term
+    pcl term asynclib

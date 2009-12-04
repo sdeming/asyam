@@ -1,0 +1,19 @@
+Whats new you ask?
+==================
+
+o   Read "HISTORY.LST"  This has a complete listing of every change I make.
+    Even the little ones.
+
+o   Christian Blum's "The_Serial_Port" will now be distributed with each
+    release.  I will be sure to keep as up to date as possible.
+
+o   Handshaking now works.  I think.
+
+o   PowerC is now fully supported.  Use "ASYNCLIB.PRJ" for Power C.
+
+o   I'm pretty sure it's compatible with Microsoft C now too, but I don't
+    have it and can't test it.
+
+o   I modified TERM.C in a couple of ways.  It's a little better now, but
+    was never really inteded to be good for anything except showing how
+    the code can be used.

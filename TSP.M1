@@ -1,0 +1,231 @@
+This is the source of the program I received from Stephen Warner
+<ee_d316@dcs.kingston.ac.uk>. The program does not work with XTs
+(but it does fine with real computers).
+
+
+A very simple Serial -> Keyboard Redirector
+= ==== ====== ======    ======== ==========
+
+;   Uses Num Pad Keys on another PC. And converts to the correct scan code
+;   that is then sent to the Keyboard Buffer. (COM1 or COM2)
+;
+;   By Stephen Warner. April 1993. (Serial V1.07)
+;
+CSEG        SEGMENT PUBLIC 'CODE'
+            ASSUME  CS:CSEG, DS:CSEG, ES:CSEG, SS:CSEG  ;COM FILE
+
+            ORG     0100h                   ; Origin for COM Files
+
+Serial7:    JMP     Install                 ; Install TSR
+
+
+COM         EQU     03F8h                   ; Select Serial Port
+
+CR          EQU     0Dh                     ; Return
+LF          EQU     0Ah                     ; LineFeed
+EOT         EQU     "$"                     ; End of text
+Bell        EQU     07h                     ; Bell
+cc          EQU     1Bh                     ; Control Code
+
+ASC_Up      EQU     00111000b               ; Defining ASCII Values for keypad
+ASC_Down    EQU     00110010b               ; Entry
+ASC_Left    EQU     00110100b
+
+ASC_UpLeft  EQU     00110111b
+ASC_UpRight EQU     00111001b
+ASC_DoLeft  EQU     00110001b
+ASC_DoRight EQU     00110011b
+ASC_Cancel  EQU     00101100b
+ASC_Select  EQU     00001010b
+
+
+IRQ         EQU     4                       ; IRQ4 for COM1 Interrupts
+INT_MASK    EQU     11101111b               ; IRQ4 Mask for 8259
+
+DATA        EQU     COM                     ; Serial Ports Data
+IER         EQU     COM+1                   ; Interrupt Enable Register
+MCR         EQU     COM+4                   ; Modem Control Register
+MSR         EQU     COM+6                   ; Modem Control Status
+
+PIC_MASK    EQU     21h                     ; 8259 Interrupt Mask Port
+PIC_EOI     EQU     20h                     ; 8259 EOI Port
+
+Int_0C:     PUSH    AX                      ; Store Registers
+            PUSH    BX
+            PUSH    CX
+            PUSH    DX
+            PUSH    SI
+            PUSH    DI
+            PUSH    DS
+            PUSH    ES
+            PUSH    BP
+
+            MOV     DX,MCR                  ; Read the Modem Control Register
+            IN      AL,DX                   ; Or else!!!!
+      
+            MOV     DX,DATA                 ; Character from Serial Port
+            IN      AL,DX 
+
+            MOV     DI,0B800h               ; Display Recieved Character
+            MOV     DS,DI
+            MOV     DI,0
+            MOV     DS:[DI],AL
+
+ 
+Up:         CMP     AL,ASC_Up
+            JNZ     Down     
+            MOV     CH,48h                  ; Output Up to Keyboard Buffer
+            JMP     Out1C
+
+Down:       CMP     AL,ASC_Down
+            JNZ     Left
+            MOV     CH,50h                  ; Output Down to Keyboard Buffer
+            JMP     Out1C
+
+Left:       CMP     AL,ASC_Left
+            JNZ     Right
+            MOV     CH,4Bh                  ; Output Left to Keyboard Buffer
+            JMP     Out1C
+
+Right:      CMP     AL,ASC_Right
+            JNZ     UpLeft
+            MOV     CH,4Dh                  ; Output Right to Keyboard Buffer
+            JMP     Out1C
+
+UpLeft:     CMP     AL,ASC_UpLeft
+            JNZ     UpRight     
+            MOV     CH,4Bh                  ; Output Up-Left to Keyboard Buffer
+            MOV     AL,48h
+            JMP     Out2C
+
+UpRight:    CMP     AL,ASC_UpRight
+            JNZ     DownLeft
+            MOV     CH,4Dh                  ; Output Up-Right to Keyboard Buffer
+            MOV     AL,48h
+            JMP     Out2C
+
+DownLeft:   CMP     AL,ASC_DoLeft
+            JNZ     DownRight
+            MOV     CH,4Bh                  ; Output Down-Left to Keyboard Buffer
+            MOV     AL,50h
+            JMP     Out2C
+
+DownRight:  CMP     AL,ASC_DoRight
+            JNZ     Cancel
+            MOV     CH,4Dh                  ; Output Down-Right to Keyboard Buffer
+            MOV     AL,50h
+            JMP     Out2C
+
+Cancel:     CMP     AL,ASC_Cancel
+            JNZ     Select
+            MOV     CH,1Ch
+            MOV     AH,05h
+            MOV     CX,011Bh                ; Output Select to Keyboard Buffer
+            INT     16h
+            JMP     INT_EOJ
+
+Select:     CMP     AL,ASC_Select
+            JNZ     INT_EOJ
+            MOV     CH,1Ch
+            MOV     AH,05h
+            MOV     CX,1C0Dh                ; Output Return to Keyboard Buffer
+            INT     16h
+            JMP     INT_EOJ
+
+Out2C:      PUSH    CX                      ; Output AL to Keyboard Buffer
+            MOV     CH,AL                   ; But store Register CX
+            MOV     AH,05h
+            MOV     CL,00h
+            INT     16h
+            POP     CX
+     
+Out1C:      MOV     AH,05h                  ; Output CH to Keyboard Buffer
+            MOV     CL,00h
+            INT     16h
+
+INT_EOJ:    MOV     AL,20h                  ; Send EOI to 8259
+            OUT     PIC_EOI,AL
+ 
+            POP     BP                      ; Restore Registers
+            POP     ES
+            POP     DS
+            POP     DI
+            POP     SI
+            POP     DX
+            POP     CX
+            POP     BX
+            POP     AX
+           
+            IRET
+
+Install:    MOV     AH,09h                  ; Display Program Info
+            MOV     DX,Offset BootMess
+            INT     21h
+             
+            MOV     AX,3500h+IRQ+8          ; Get Interrupt vector
+            INT     21h
+
+            MOV     DX,Offset int_0C        ; Checks to see if already
+            CMP     BX,DX                   ; Installed
+            JZ      Already                 ; If so display Installed message
+
+            MOV     AX,2500h+IRQ+8          ; Set Interrupt vector
+            MOV     DX,Offset int_0C 
+            INT     21h
+        
+            MOV     AX,00h+10000010b        ; Initilise Com Port 1
+            MOV     DX,0000h                ; Baud Rate 1200, 7-N-1
+            INT     14h
+
+            MOV     DX,MCR                  ; Set Modem-Control Register
+            MOV     AL,00001011b            ; DTR, RTS and OUT2 bits
+            OUT     DX,AL
+
+            MOV     DX,IER                  ; Set Interrupt Enable Register
+            MOV     AL,00000001b            ; On Serial Port Controller
+            OUT     DX,AL
+
+            IN      AL,PIC_MASK             ; Read Current 8259 mask
+            AND     AL,INT_MASK             ; Set Mask for Com Port not bit 4
+            OUT     PIC_MASK,AL             ; Write new 8259 mask
+
+            MOV     AH,09h                  ; Display Installed..
+            MOV     DX,Offset InstMess
+            INT     21h
+
+            MOV     DX,Offset Install       ; Terminate Stay Resident (Exit)
+            INT     27h
+
+Already:    MOV     AH,09h                  ; Display Already Installed..
+            MOV     DX,Offset AlreMess
+            INT     21h
+            RET                             ; Exit without Installing TSR
+
+BootMess:   DB      cc,"[2J",cc,"[f",cc,"[44m",cc,"[1;33m",cc,"[1;2H"
+            DB      "ZDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD?"
+            DB      cc,"[2;2H"
+            DB      "3                   Stephen Warner TSR v1.07 (c) Apr 1993                   CD?"
+            DB      cc,"[3;2H"
+            DB      "3            This TSR is used with Group 8's Serial Keypad/Mouse            3 3"
+            DB      cc,"[4;2H"
+            DB      "@DBDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDY 3"
+            DB      cc,"[5;4H"
+            DB      "@DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDY"
+            DB      cc,"[40m",cc,"[0;37m",cc,eot
+
+InstMess:   DB      " ",cc,"[7;1H",cc,"[7;1H"
+            DB      "Keypad/Mouse Driver Installed..."
+            DB      lf,lf,cr,eot
+
+AlreMess:   DB      " ",cc,"[7;1H"
+            DB      "Keypad/Mouse Driver Already Installed..."
+            DB      lf,lf,cr,Bell,eot
+
+CSEG        ends
+            end Serial7
+
+
+
+
+
+

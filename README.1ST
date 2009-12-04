@@ -1,0 +1,102 @@
+.   .   .   .   ########################################## .   .   .   .
+  .   .   .   . ##                                      ##   .   .   .   .
+.   .   .   .   ##   Async Tools for the Async Minded   ## .   .   .   .
+  .   .   .   . ##   ================================   ##   .   .   .   .
+.   .   .   .   ##           Scott A. Deming            ## .   .   .   .
+  .   .   .   . ##          sad@umcc.umich.edu          ##   .   .   .   .
+.   .   .   .   ##   No version yet, and no real name.  ## .   .   .   .
+  .   .   .   . ##                                      ##   .   .   .   .
+.   .   .   .   ########################################## .   .   .   .
+==========================================================================
+
+7-12-93:
+
+Well, we're on our way.  These routines are finally taking shape.  I need
+to come up with a good name for them for the 1.00 release which is coming
+up real soon.  If anyone has any suggestions, please let me know.  I'll
+be thinking myself.  I'll compile a list of all the names recomended, and
+the names that I come up with and hold an "election."
+
+The terminal program now accepts to command line paramaters: COMport, and
+Baudrate.  Execute it like this:  "C:\ASYNC> TERM 1 38400" for COM1 at
+38400 baud.  Did I mess my terminology up there?  Oh well.  If you don't
+specify a baud rate it will assume 9600, and if you don't tell it which
+comport you want to use it will assume COM1.  It automatically assumes
+N,8,1.
+
+The terminal program is lousy, and needs a lot of work.  It's intended
+use is for testing everything.  I will eventually make a version that
+will allow you to run two comports at the same time.  I wish I could do
+four, but the IRQ's wont allow it.  Anyone have any information on DIGIBOARD
+or any other multi-port serial boards?
+
+There are some functions left over in HSHAKE.C which don't need to be.  I
+will be cleaning all of that up soon, so ignore it.
+
+There is also a half port for the Phar Lap's 286|DOS-Extender.  Please
+ignore it, and compile with EXTENDER = "" in the MAKEFILE.
+
+----------------------------------------------------------------------------
+PLEASE HELP IN DEVELOPMENT!
+
+If you have any unwanted compilers with manuals that you could pass along
+or if you are just generous and want to buy me any compilers (for the PC
+of course) please do!  I would like to make this library as portable as
+possible.
+
+Currently I have:
+    Borland C++ 3.1
+    Power C 2.2.0
+
+Compilers I'd really like are:
+    Microsoft C 6.0, Microsoft C++ 7.0, and Visual C++ 1.0
+    Watcom
+    Zortech
+    High C
+
+Any that I've missed.  PD or Commercial, I don't care!  I want to make this
+as portable as possible.
+
+----------------------------------------------------------------------------
+Thank You!
+
+Special thanks to Chris Blum and everyone who helped him with his summary.
+And thank you Chris for letting me distribute the summary with this library.
+
+----------------------------------------------------------------------------
+Disclamer
+
+BTW:  I'm not in this to make any money, I just needed some good serial
+routines, and these are off on a good start.  They will ALWAYS be FREE
+and will ALWAYS have complete source code.  But, they are still:
+
+If you use these routines for anything useful, drop me a line.  I'd love
+to hear about it.
+
+This code is NOT public domain.  It's MyWare.  Basically it's only free while
+I say it is.  Right now anyone can use it for anything they want without any
+initial fee, surcharge, notifications, legallities, royalties, or anything
+that makes it difficult to use.  You can use this library for anything you
+want to without even telling anyone.  In fact, you can say they are YOUR very
+own routines and nobody will breathe down your neck about it.  But I must add
+that I am the creator of them, and I can change my mind about it's availability
+whenever I want to.  If I do decide to change my mind it will not affect any
+release except the one I change my mind on.  Meaning, if I change my mind
+on version 2.00, any release before that will still be free.  The idea here is
+that if I get lucky somehow, some way, and somebody decides to give me a lot
+of money for these routines, or I feel they've progressed far enough to compete
+with everything else out there then I will possibly begin to make a living off
+of them.
+
+Don't count on me ever selling out like that, I just want to make it clear that
+I do reserve that right.
+
+-------------------------------------------------------------------------------
+Copyright stuff
+
+Async Libarary -- Copyright (C) 1993, by Scott A. Deming. ALL RIGHTS RESERVED.
+The_Serial_Port -- Copyright (C) 1993, by Chris Blum. ALL RIGHTS RESERVED.
+
+-------------------------------------------------------------------------------
+
+'til next time...

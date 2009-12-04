@@ -1,0 +1,136 @@
+.AUTODEPEND
+##############################################################################
+##                                                                          ##
+## Async Tools for the Async Minded                                         ##
+## ================================                                         ##
+## v0.50 -- Copyright(C) 1993, by Scott A. Deming -- ALL RIGHTS RESERVED!   ##
+##                                                                          ##
+## Special thanks to:  Chris Blum for his Summary on Serial Ports           ##
+##                                                                          ##
+## -- NOTE -- THIS IS A VERY INCOMPLETE PACKAGE -- SEE TODO.DOC             ##
+##                                                                          ##
+##############################################################################
+##                                                                          ##
+## MAKE clean     : Clean up around the house.  Deletes *.BAK, *.OBJ,       ##
+##                  TERM.EXE, and ASYNCLIB.LIB.                             ##
+##                                                                          ##
+## MAKE asynclib  : Compiles all of the source files and creates a lib      ##
+##                  file for easy linkage.                                  ##
+##                                                                          ##
+## MAKE term      : Builds just the terminal program that comes with the    ##
+##                  library.                                                ##
+##                                                                          ##
+## MAKE all       : makes asynclib.lib, and builds the terminal program     ##
+##                  term.exe.                                               ##
+##                                                                          ##
+## MAKE fresh     : cleans, makes all                                       ##
+##                                                                          ##
+##############################################################################
+
+## Define DOS extender here
+##      "DOSX286"       -- Compile for Phar Lap 286|DOS-EXTENDER.
+##                         SDK Required.
+EXTENDER= ""
+
+## Define the include and library directories here
+##
+INCLUDE= \borlandc\include;\run286\inc
+LIB= \borlandc\lib;\run286\bc3\lib
+
+## Set DEBUG to -v if you want to use Turbo Debugger with this library.
+##
+DEBUG= -v
+
+## Set MODEL to -ml for large memory model
+## -ml is all thats been tested as of now.
+## Please let me know if you test it with any other models, I currently only
+## have my compiler set up to allow large model.
+##
+MODEL= -ml
+
+## Define compiler here
+##      BORLANDC
+##      TURBOC          -- Untested
+##      MSC             -- Untested
+##      POWERC          -- See ASYNCLIB.PRJ, that should do the trick.
+##
+COMPILER= BORLANDC
+
+## Define the compiler executable here
+##      tcc
+##      bcc
+##      cl
+##
+CC= @bcc
+
+## Compiler command line parameters.
+##
+!if $(EXTENDER) == "DOSX286"
+CFLAGS= $(MODEL) $(DEBUG) -DDOSX286 -D$(COMPILER) -r- -2 -w -I$(INCLUDE) -L$(LIB)
+!else
+CFLAGS= $(MODEL) $(DEBUG) -D$(COMPILER) -r- -2 -w -I$(INCLUDE) -L$(LIB)
+!endif
+
+## Define the linker executable here
+##      tlink       -- Turbo Link
+##
+LINK= @tlink
+
+## Linker command line paramaters.
+##
+!if $(EXTENDER) == "DOSX286"
+LNFLAGS= /x/n/c/C/P-/L$(LIB)
+!else
+LNFLAGS= /x/n/c/C/P-/L$(LIB)
+!endif
+
+## Linker list file.
+##
+!if $(EXTENDER) == "DOSX286"
+LLFILE= ASYNCPL.LNK
+!else
+LLFILE= ASYNCLIB.LNK
+!endif
+
+## Define the library executable here
+##      tlib        -- Turbo/Borland C
+##      lib         -- MicroSoft C
+##
+LIBRARY= @tlib
+
+## LIBRARY command line parameters.
+##
+LFLAGS= -+$&
+
+## Objects to put in the library.
+##
+OBJS= async.obj setuart.obj detect.obj isr.obj fifo.obj line.obj \
+      asyio.obj hshake.obj
+
+.c.obj :
+    $(CC) -c $(CFLAGS) $<
+    $(LIBRARY) asynclib $(LFLAGS)
+
+help:
+    @cls
+    @echo Make FRESH cleans up, and makes all.
+    @echo Make ALL makes everything.
+    @echo Make CLEAN cleans up.
+    @echo Make ASYNCLIB makes ASYNCLIB.LIB.
+    @echo Make TERM makes the terminal program.
+
+fresh: clean all
+
+all: asynclib term
+
+clean:
+    del *.obj
+    del *.bak
+    del asynclib.lib
+    del term.exe
+
+asynclib: $(OBJS)
+
+term:
+    $(CC) $(CFLAGS) -c term.c asynclib.lib
+    $(LINK) $(LNFLAGS) @$(LLFILE)

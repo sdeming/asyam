@@ -1,0 +1,9 @@
+This is an old libray I wrote in the early 90's to do async serial
+communications in MS-DOS. Ultimately it was used in point of sale software
+for downloading and reports from various stores.
+
+This library was based on Christian Blum's excellent tutorials. It provides
+an interesting insight to how I wrote code more than 15 years ago (and
+counting).
+
+Stored here, mostly for preservation.

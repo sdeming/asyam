@@ -1,0 +1,8 @@
+\run286\bc3\lib\c0pl.obj+
+term.obj
+term
+
+asynclib.lib+
+bcl286.lib+
+phapi.lib
+pharlap.def

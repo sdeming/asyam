@@ -1,0 +1,6 @@
+\borlandc\lib\c0l.obj+
+term.obj
+term
+
+asynclib.lib+
+cl.lib

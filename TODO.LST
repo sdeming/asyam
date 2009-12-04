@@ -1,0 +1,27 @@
+----------------------------------------------------------------------------
+Things To Do
+----------------------------------------------------------------------------
+
+* Full 16550A fifo support -- I'm not sure it's not already there...
+* Good documentations.  Anyone interested?
+- Support Phar Laps DOS Extender.  I use it here at work, so why not make
+  these routines portable to it.  Besides, I have to for a project I'm
+  currently working on.
+- Fossil support.  This should be fairly simple.  According to Ralf Browns
+  PC Interrupts.
+- Terminal Emulation Filters (Ansi, VT52, VT100, VT102, any others?)
+  Anyone interested?
+- File Transfer Protocols (Ascii, XModem, YModem, ZModem, Kermit, etc)
+  A little note about this.  I would like it to be a "polled" protocol
+  where you keep calling a certain function.  This would make it easy
+  for simple multi-tasking.  Anyone interested?
+- Portability to other C compilers:
+        DJGCC, MicroSoft C, Watcom, Power C, High C, Zortech C++ (perhaps)
+  Anyone have a compiler or two to spare?
+- Make Files and Project Files for each compiler.
+- C++ wrapper.  If I ever decide to learn C++.
+- Support for add-on third party boards such as digi-board.  These I have
+  absolutely no information for, experience with, or knowledge of.
+
+
+* Must finish these items up first, for the first initial complete release.

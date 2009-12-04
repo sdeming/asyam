@@ -1,0 +1,123 @@
+----------------------------------------------------------------------------
+History of Changes, Updates, Modifications, or Alterations.
+----------------------------------------------------------------------------
+
+6-24-93 SAD (Scott A. Deming)
+===========
+    - Initialial semi-release.
+
+6-25-93 SAD
+===========
+    - Created this "history.doc" file.
+    - MSRStatus and LSRStatus arrays removed, and placed into
+      async_portS structure as int MSRstatus, and int LSRstatus.
+    - Changed async_set_DTR, async_set_RTS, async_DTR_status,
+      async_RTS_status functions to use MCR_DTR & MCR_RTS macros for
+      a more formal appeal.
+
+6-28-93 SAD
+===========
+    - Noticed a line of code left in asyio.c, function async_putch() that
+      shouldn't be there.  It was an out to the Interrupt Enable Register
+      that is called in async_putch_timeout already.  Calling it twice is
+      rather useless.  My mistake. :)
+    - Added an async_printf function that uses stdargs.  I'm kind of torn
+      between using a dynamically allocated buffer and using the stack for
+      the buffer.  I figure dynamically there really isn't anything to lose
+      but if I used the stack I would be asking for trouble.
+    - Added async_gets function which will input size number of characters
+      or stop when a carriage return and or linefeed is reached.
+    - Added async_getblock_timeout which polls the RX buffer for x number
+      of milliseconds before returning.
+    - Added MACROs and Global variables to documentation.
+    - Made use of the NUMBEROFPORTS MACRO where it should have been used
+      before.  I think I covered most of it.
+    - Added a TO-DO list.  (See: todo.doc)
+    - Made a new makefile, hopefully it's more portable than the old one.
+      It's a lot easier to follow than Borlands PRJ2MAK style.
+    - Made makefile create ASYNCLIB.LIB.  Much nicer to work with.  Only
+      have to link with ASYNCLIB.LIB instead of each individual .OBJ.
+    - Created a distribution list for easy mailing.
+
+6-29-93 SAD
+===========
+    - Removed the window(1,2,80,25) call in term.c.  It was used for testing
+      something previously, and I forgot to remove it before.
+    - Pre-Released again.
+
+7-2-93 SAD
+==========
+    - Created the mailing list.  Added all names of people who were interested
+      to my elm aliases file and we'll go from there.
+    - A little cleanup here and there.
+    - Decided to release yet another pre-release for the mailing list.  So
+      that everyone is up to date with everything.
+    - Changed inline assembly calls for sti and cli to _enable() and _disable()
+      for portability.  Notified of this by Christian Blum.  Thanks again!
+
+7-6-93 SAD
+==========
+    - Added a little more information to the Makefile.  What means what.
+    - Changed ASYNC.H and Makefile to be a bit more compatible:
+      Makefile:
+        COMPILER macro added to support BORLANDC, TURBOC, and MSC.
+      ASYNC.H:
+        Compatibility definitions section added allowing us to use
+        Power C, Microsoft C, Turbo C, and Borland C.  I have only
+        tested Borland C and Power C though.
+        Among these additions are:
+            _dos_setvect and _dos_getvect function naming.
+            _OLDISR macro defined.
+            _enable, _disable added for Power C and Turbo C.
+            clrscr remapped to clrscrn for Power C.
+    - Added PC_COMP.C for Power C compatibility.  This file contains
+      a delay function that I'm hoping works.  I haven't tested it yet.
+    - Created a project file for Power C, along with ASYNCLIB.C which is
+      a strange way to make a library.  But this is MIX's idea.  I took
+      the idea straight from their project file for the runtime library.
+    - Changed 16460 to 16450
+    - Changed set_handshaking function.  Beginning implementation of
+      handshaking routines.
+
+7-7-93 SAD
+==========
+    - Still working on handshaking implementation.  It's confusing for a
+      little guy like me.
+    - Added ISR_exit() for removing the installed ISR on an abnormal exit.
+      This will be called any time the program ends, and will remove the ISR
+      on each port it's installed on.  This may be too low level, meaning,
+      you may wnat to make a call to close_port() within this exit function
+      so it will shut down the FIFO, and do the normal maintenance routine.
+      This is basically just to keep the ISR from hanging around when your
+      program exits in an odd spot.  I strongly suggest using close_port()
+      in areas where you know the port is being closed.
+    - Revamped the ISR's quite a bit.  Had some bugs in it that I never knew
+      existed.
+    - Moved set_handshaking() from SET_UART.C to HSHAKE.C.  It's fits better
+      there.
+    - Full XON/XOFF implementation complete.  Next on the agenda is RTS/CTS.
+    - Added async_tx_enable() function which basically just forces the ISR
+      to call ISRtx().  This is really kind of an internal function.  It
+      seems to me that there should be a better way of handling what it is,
+      but I have failed to find one.  This works good so far.
+    - Added LSR_ macros.  They aren't used yet, but they will be.
+    - Created HSHAKE.C which contains the majority of the handshaking code.
+    - I dramatically tested the XON/XOFF handshaking with Telemate and it
+      worked GREAT sending and receiving an ASCII file at 115200 BPS.
+    - Revised TERM.C minimally -- Needs work to show off true power.
+    - Cleaned up some warnings, but not all.
+    - Put an //add by anything that needed to be added to the lousy docs.
+    - Fixed up and cleaned up to be compatible with PowerC again.  Lost the
+      portability with a few of the changes.  Wasn't a big deal to fix though.
+    - Added a few things and removed an item from TODO.LST.  Got rid of the
+      XON/XOFF flow control item, and added a few various items.
+
+7-8-93 SAD
+==========
+    - I think RTS/CTS and DTR/DSR flow control are in, but I can't think
+      of how I can test it.  I think they're there now though.
+
+7-12-93 SAD
+==========
+    - Pre-Released again.  Now with full Handshaking, and an improved
+      TERM.  Also included is "The_Serial_Port" summary!
